@@ -1,0 +1,12 @@
+com\badmintion\authservice\model\Role.class
+com\badmintion\authservice\repository\UserRepository.class
+com\badmintion\authservice\security\JwtAuthenticationFilter.class
+com\badmintion\authservice\dto\AuthResponse.class
+com\badmintion\authservice\controller\AuthController.class
+com\badmintion\authservice\dto\RegisterRequest.class
+com\badmintion\authservice\model\User.class
+com\badmintion\authservice\security\JwtService.class
+com\badmintion\authservice\service\AuthService.class
+com\badmintion\authservice\security\CustomUserDetailsService.class
+com\badmintion\authservice\AuthServiceApplication.class
+com\badmintion\authservice\security\SecurityConfig.class

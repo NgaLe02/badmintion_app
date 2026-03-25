@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/auth_db?useSSL=true&serverTimezone=UTC}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+    show-sql: false
+
+jwt:
+  private-key-path: ${JWT_PRIVATE_KEY_PATH:classpath:rsa/privateKey.rsa}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH:classpath:rsa/publicKey.rsa}

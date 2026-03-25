@@ -1,0 +1,4 @@
+com\badmintion\gatewayservice\filter\AuthenticationFilter.class
+com\badmintion\gatewayservice\security\JwtUtil.class
+com\badmintion\gatewayservice\GatewayServiceApplication.class
+com\badmintion\gatewayservice\filter\RouteValidator.class
