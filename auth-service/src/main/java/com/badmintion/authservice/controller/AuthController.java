@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.badmintion.authservice.dto.AuthRequest;
 import com.badmintion.authservice.dto.AuthResponse;
+import com.badmintion.authservice.dto.GoogleAuthRequest;
 import com.badmintion.authservice.dto.RefreshTokenRequest;
 import com.badmintion.authservice.dto.RegisterRequest;
 import com.badmintion.authservice.service.AuthService;
@@ -58,6 +59,24 @@ public class AuthController {
         authService.logout(request.getRefreshToken());
         log.info("Logout completed for tokenPrefix={}", tokenPrefix(request.getRefreshToken()));
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @PostMapping("/google/register")
+    public ResponseEntity<AuthResponse> registerWithGoogle(@Valid @RequestBody GoogleAuthRequest request) {
+        log.info("Received Google register request with rememberMe={}, tokenPrefix={}",
+                request.getRememberMe(), tokenPrefix(request.getIdToken()));
+        AuthResponse response = authService.registerWithGoogle(request);
+        log.info("Google register completed with role={}", response.getUserRole());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/google/login")
+    public ResponseEntity<AuthResponse> loginWithGoogle(@Valid @RequestBody GoogleAuthRequest request) {
+        log.info("Received Google login request with rememberMe={}, tokenPrefix={}",
+                request.getRememberMe(), tokenPrefix(request.getIdToken()));
+        AuthResponse response = authService.loginWithGoogle(request);
+        log.info("Google login completed with role={}", response.getUserRole());
+        return ResponseEntity.ok(response);
     }
 
     private String tokenPrefix(String token) {

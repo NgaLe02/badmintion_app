@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.badmintion.authservice.security.JwtService;
+import com.badmintion.authservice.service.GoogleTokenPayload;
+import com.badmintion.authservice.service.GoogleTokenVerifierService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,6 +36,9 @@ class AuthFlowIntegrationTest {
 
     @MockBean
     private JwtService jwtService;
+
+    @MockBean
+    private GoogleTokenVerifierService googleTokenVerifierService;
 
     @Test
     void registerShouldCreateUser() throws Exception {
@@ -154,6 +159,65 @@ class AuthFlowIntegrationTest {
                 .content(loginPayload))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isEmpty())
+                .andExpect(jsonPath("$.userRole").value("USER"));
+    }
+
+    @Test
+    void googleRegisterShouldCreateUserAndReturnTokens() throws Exception {
+        when(googleTokenVerifierService.verifyAndExtract(anyString()))
+                .thenReturn(new GoogleTokenPayload("google_register@example.com", "Google Register", "google-sub-1"));
+        when(jwtService.generateAccessToken(any(UserDetails.class))).thenReturn("google-register-access-token");
+        when(jwtService.generateRefreshToken(any(UserDetails.class))).thenReturn("google-register-refresh-token");
+        when(jwtService.extractExpiration(anyString())).thenReturn(new java.util.Date(System.currentTimeMillis() + 3600000));
+
+        String googleRegisterPayload = """
+                {
+                  "idToken": "google-id-token-register",
+                  "rememberMe": true
+                }
+                """;
+
+        mockMvc.perform(post("/auth/google/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(googleRegisterPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("google-register-access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("google-register-refresh-token"))
+                .andExpect(jsonPath("$.userRole").value("USER"));
+    }
+
+    @Test
+    void googleLoginShouldAuthenticateExistingUserAndReturnAccessToken() throws Exception {
+        when(googleTokenVerifierService.verifyAndExtract(anyString()))
+                .thenReturn(new GoogleTokenPayload("google_login@example.com", "Google Login", "google-sub-2"));
+        when(jwtService.generateAccessToken(any(UserDetails.class))).thenReturn("google-login-access-token");
+
+        String registerPayload = """
+                {
+                  "username": "google_login_user",
+                  "email": "google_login@example.com",
+                  "password": "secret123"
+                }
+                """;
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(registerPayload))
+                .andExpect(status().isOk());
+
+        String googleLoginPayload = """
+                {
+                  "idToken": "google-id-token-login",
+                  "rememberMe": false
+                }
+                """;
+
+        mockMvc.perform(post("/auth/google/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(googleLoginPayload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("google-login-access-token"))
                 .andExpect(jsonPath("$.refreshToken").isEmpty())
                 .andExpect(jsonPath("$.userRole").value("USER"));
     }

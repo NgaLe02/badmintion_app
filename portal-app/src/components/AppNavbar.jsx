@@ -1,19 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
-import {
-  clearAuthData,
-  getAccessToken,
-  getUserRole,
-} from "../utils/authStorage";
+import { Link } from "react-router-dom";
+import { getAccessToken, getUserRole } from "../utils/authStorage";
 
 function AppNavbar() {
-  const navigate = useNavigate();
   const accessToken = getAccessToken();
   const userRole = getUserRole();
-
-  const handleLogout = () => {
-    clearAuthData();
-    navigate("/login", { replace: true });
-  };
 
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom">
@@ -27,18 +17,19 @@ function AppNavbar() {
               <span className="badge text-bg-light border">
                 Vai trò: {userRole || "N/A"}
               </span>
-              <button
-                type="button"
-                className="btn btn-outline-danger btn-sm"
-                onClick={handleLogout}
-              >
+              <Link className="btn btn-outline-danger btn-sm" to="/logout">
                 Đăng xuất
-              </button>
+              </Link>
             </>
           ) : (
-            <Link className="btn btn-primary btn-sm" to="/login">
-              Đăng nhập
-            </Link>
+            <>
+              <Link className="btn btn-outline-primary btn-sm" to="/signup">
+                Đăng ký
+              </Link>
+              <Link className="btn btn-primary btn-sm" to="/login">
+                Đăng nhập
+              </Link>
+            </>
           )}
         </div>
       </div>

@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axiosConfig";
 import { REFRESH_TOKEN_KEY, saveAuthData } from "../utils/authStorage";
 
-function LoginPage() {
+function SignupPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || "/";
   const googleButtonContainerRef = useRef(null);
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const [formData, setFormData] = useState({
     username: "",
+    email: "",
     password: "",
     rememberMe: false,
   });
@@ -29,50 +27,26 @@ function LoginPage() {
     }));
   };
 
-  const resetMessages = () => {
-    setErrorMessage("");
-    setSuccessMessage("");
-  };
-
-  const handleLogin = async () => {
-    const response = await api.post("/auth/login", {
+  const handleSignup = async () => {
+    await api.post("/auth/register", {
       username: formData.username,
+      email: formData.email,
       password: formData.password,
-      rememberMe: formData.rememberMe,
     });
 
-    const { accessToken, refreshToken, userRole } = response.data || {};
-
-    if (!accessToken) {
-      throw new Error("Đăng nhập thất bại: thiếu accessToken.");
-    }
-
-    saveAuthData({
-      accessToken,
-      userRole,
-      refreshToken: formData.rememberMe ? refreshToken : null,
-    });
-
-    if (!(formData.rememberMe && refreshToken)) {
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
-    }
-
-    navigate(from, { replace: true });
+    setSuccessMessage("Đăng ký thành công. Vui lòng đăng nhập.");
+    setTimeout(() => navigate("/login", { replace: true }), 600);
   };
 
-  const handleGoogleAuth = async (googleCredential) => {
-    if (!googleCredential) {
-      throw new Error("Không nhận được Google ID token.");
-    }
-
-    const response = await api.post("/auth/google/login", {
+  const handleGoogleRegister = async (googleCredential) => {
+    const response = await api.post("/auth/google/register", {
       idToken: googleCredential,
       rememberMe: formData.rememberMe,
     });
 
     const { accessToken, refreshToken, userRole } = response.data || {};
     if (!accessToken) {
-      throw new Error("Xác thực Google thất bại: thiếu accessToken.");
+      throw new Error("Đăng ký Google thất bại: thiếu accessToken.");
     }
 
     saveAuthData({
@@ -85,7 +59,7 @@ function LoginPage() {
       localStorage.removeItem(REFRESH_TOKEN_KEY);
     }
 
-    navigate(from, { replace: true });
+    navigate("/", { replace: true });
   };
 
   useEffect(() => {
@@ -104,11 +78,11 @@ function LoginPage() {
         setGoogleLoading(true);
         setErrorMessage("");
         try {
-          await handleGoogleAuth(googleResponse?.credential);
+          await handleGoogleRegister(googleResponse?.credential);
         } catch (error) {
           const backendMessage = error?.response?.data?.message;
           setErrorMessage(
-            backendMessage || "Đăng nhập Google thất bại. Vui lòng thử lại.",
+            backendMessage || "Đăng ký Google thất bại. Vui lòng thử lại.",
           );
         } finally {
           setGoogleLoading(false);
@@ -122,17 +96,18 @@ function LoginPage() {
       size: "large",
       width: 320,
       shape: "pill",
-      text: "signin_with",
+      text: "signup_with",
     });
   }, [googleClientId, formData.rememberMe]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    resetMessages();
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
-      await handleLogin();
+      await handleSignup();
     } catch (error) {
       const backendMessage = error?.response?.data?.message;
       setErrorMessage(backendMessage || "Có lỗi xảy ra. Vui lòng thử lại.");
@@ -148,21 +123,16 @@ function LoginPage() {
           <div className="col-12 col-sm-10 col-md-8 col-lg-5">
             <div className="card auth-card">
               <div className="card-body p-4 p-md-5">
-                <h2 className="fw-bold text-center mb-2">Đăng nhập</h2>
+                <h2 className="fw-bold text-center mb-2">Đăng ký</h2>
                 <p className="text-secondary text-center mb-4">
-                  Sử dụng tài khoản để tiếp tục vào hệ thống.
+                  Tạo tài khoản mới để sử dụng hệ thống.
                 </p>
 
                 {errorMessage && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
+                  <div className="alert alert-danger">{errorMessage}</div>
                 )}
-
                 {successMessage && (
-                  <div className="alert alert-success" role="alert">
-                    {successMessage}
-                  </div>
+                  <div className="alert alert-success">{successMessage}</div>
                 )}
 
                 <form onSubmit={handleSubmit}>
@@ -176,6 +146,21 @@ function LoginPage() {
                       name="username"
                       className="form-control form-control-lg"
                       value={formData.username}
+                      onChange={onInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="email" className="form-label fw-medium">
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      className="form-control form-control-lg"
+                      value={formData.email}
                       onChange={onInputChange}
                       required
                     />
@@ -206,7 +191,7 @@ function LoginPage() {
                       onChange={onInputChange}
                     />
                     <label htmlFor="rememberMe" className="form-check-label">
-                      Ghi nhớ đăng nhập
+                      Ghi nhớ đăng nhập sau khi đăng ký Google
                     </label>
                   </div>
 
@@ -215,7 +200,7 @@ function LoginPage() {
                     className="btn btn-primary btn-lg w-100"
                     disabled={loading}
                   >
-                    {loading ? "Đang xử lý..." : "Đăng nhập"}
+                    {loading ? "Đang xử lý..." : "Tạo tài khoản"}
                   </button>
                 </form>
 
@@ -232,13 +217,6 @@ function LoginPage() {
                   <div ref={googleButtonContainerRef} />
                 </div>
 
-                {googleClientId && (
-                  <p className="text-center small text-secondary mt-2 mb-0">
-                    Nếu chưa thấy nút Google, hãy kiểm tra popup/cookie trình
-                    duyệt hoặc tải lại trang.
-                  </p>
-                )}
-
                 {googleLoading && (
                   <p className="text-center text-secondary mt-2 mb-0">
                     Đang xác thực với Google...
@@ -247,14 +225,8 @@ function LoginPage() {
 
                 <div className="text-center mt-4">
                   <p className="mb-0">
-                    Chưa có tài khoản? <Link to="/signup">Đăng ký ngay</Link>
+                    Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
                   </p>
-                </div>
-
-                <div className="text-center mt-2">
-                  <Link to="/" className="small text-decoration-none">
-                    Quay về trang chủ
-                  </Link>
                 </div>
               </div>
             </div>
@@ -265,4 +237,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default SignupPage;

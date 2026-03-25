@@ -13,7 +13,9 @@ public class RouteValidator {
             "/auth/register",
             "/auth/login",
             "/auth/refresh",
-            "/auth/logout"
+            "/auth/logout",
+            "/auth/google/register",
+            "/auth/google/login"
     );
 
     public final Predicate<ServerHttpRequest> isSecured = request

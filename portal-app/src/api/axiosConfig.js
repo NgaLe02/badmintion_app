@@ -14,7 +14,14 @@ const api = axios.create({
   timeout: 15000,
 });
 
-const publicPaths = ["/auth/login", "/auth/register", "/auth/refresh"];
+const publicPaths = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/logout",
+  "/auth/google/login",
+  "/auth/google/register",
+];
 
 let isRefreshing = false;
 let pendingRequests = [];

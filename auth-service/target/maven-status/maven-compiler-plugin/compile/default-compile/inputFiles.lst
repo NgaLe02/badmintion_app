@@ -2,6 +2,7 @@ D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservi
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\controller\AuthController.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\AuthRequest.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\AuthResponse.java
+D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\GoogleAuthRequest.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\RefreshTokenRequest.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\RegisterRequest.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\model\RefreshToken.java
@@ -14,3 +15,5 @@ D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservi
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\security\JwtService.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\security\SecurityConfig.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\service\AuthService.java
+D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\service\GoogleTokenPayload.java
+D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\service\GoogleTokenVerifierService.java
