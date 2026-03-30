@@ -18,4 +18,4 @@ jwt:
 
 google:
   oauth:
-    client-id: ${GOOGLE_OAUTH_CLIENT_ID:your-google-client-id}
+    client-id: 827799100295-4r39cib06v28l4ruenmq3qqctvt7nglv.apps.googleusercontent.com
