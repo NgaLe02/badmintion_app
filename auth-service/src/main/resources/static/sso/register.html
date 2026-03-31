@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSO Register</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --text: #10233f;
+        --muted: #5b6b84;
+        --primary: #1e6ee6;
+        --primary-dark: #1658ba;
+        --border: #dce5f2;
+        --danger: #bf2d2d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(
+          circle at top right,
+          #d9e9ff,
+          var(--bg) 50%
+        );
+        color: var(--text);
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 440px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 12px 32px rgba(22, 66, 136, 0.12);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+      }
+
+      .subtitle {
+        margin: 0 0 20px;
+        color: var(--muted);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="password"] {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 11px 12px;
+        margin-bottom: 14px;
+        font-size: 15px;
+      }
+
+      .remember {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        padding: 12px;
+        background: var(--primary);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--primary-dark);
+      }
+
+      .message {
+        min-height: 22px;
+        margin: 0 0 12px;
+        color: var(--danger);
+      }
+
+      .footer {
+        margin-top: 16px;
+        text-align: center;
+      }
+
+      .footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Đăng ký SSO</h1>
+      <p class="subtitle">Tạo tài khoản tập trung tại auth-service.</p>
+
+      <p id="message" class="message"></p>
+
+      <form id="registerForm">
+        <label for="username">Tên đăng nhập</label>
+        <input id="username" name="username" type="text" required />
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+
+        <label for="password">Mật khẩu</label>
+        <input id="password" name="password" type="password" required />
+
+        <label class="remember" for="rememberMe">
+          <input id="rememberMe" name="rememberMe" type="checkbox" />
+          Ghi nhớ đăng nhập sau khi đăng ký
+        </label>
+
+        <button type="submit">Đăng ký và đăng nhập</button>
+      </form>
+
+      <div class="footer">
+        Đã có tài khoản? <a id="loginLink" href="/sso/login">Đăng nhập</a>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        const query = new URLSearchParams(window.location.search);
+        const redirectUri =
+          query.get("redirect_uri") || "http://localhost:5173/sso/callback";
+        const state = query.get("state") || "/";
+        const loginLink = document.getElementById("loginLink");
+        const messageEl = document.getElementById("message");
+
+        loginLink.href =
+          "/sso/login?" +
+          new URLSearchParams({
+            redirect_uri: redirectUri,
+            state,
+          }).toString();
+
+        const buildCallbackUrl = (payload) => {
+          const callback = new URL(redirectUri);
+          callback.hash = new URLSearchParams(payload).toString();
+          return callback.toString();
+        };
+
+        document
+          .getElementById("registerForm")
+          .addEventListener("submit", async (event) => {
+            event.preventDefault();
+            messageEl.textContent = "";
+
+            const formData = new FormData(event.target);
+            const username = String(formData.get("username") || "").trim();
+            const email = String(formData.get("email") || "").trim();
+            const password = String(formData.get("password") || "");
+            const rememberMe = formData.get("rememberMe") === "on";
+
+            try {
+              const registerResponse = await fetch("/auth/register", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, email, password }),
+              });
+
+              const registerData = await registerResponse
+                .json()
+                .catch(() => ({}));
+              if (!registerResponse.ok) {
+                throw new Error(registerData.message || "Đăng ký thất bại");
+              }
+
+              const loginResponse = await fetch("/auth/password-auth", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password, rememberMe }),
+              });
+
+              const loginData = await loginResponse.json().catch(() => ({}));
+              if (!loginResponse.ok || !loginData.accessToken) {
+                throw new Error(
+                  loginData.message || "Đăng nhập sau đăng ký thất bại",
+                );
+              }
+
+              window.location.href = buildCallbackUrl({
+                accessToken: loginData.accessToken,
+                refreshToken: loginData.refreshToken || "",
+                userRole: loginData.userRole || "",
+                state,
+              });
+            } catch (error) {
+              messageEl.textContent = error.message || "Có lỗi xảy ra";
+            }
+          });
+      })();
+    </script>
+  </body>
+</html>

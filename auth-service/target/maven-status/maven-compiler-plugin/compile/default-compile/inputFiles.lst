@@ -1,5 +1,6 @@
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\AuthServiceApplication.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\controller\AuthController.java
+D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\controller\SsoPageController.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\AuthRequest.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\AuthResponse.java
 D:\workspacee\badmintion_app\auth-service\src\main\java\com\badmintion\authservice\dto\GoogleAuthRequest.java

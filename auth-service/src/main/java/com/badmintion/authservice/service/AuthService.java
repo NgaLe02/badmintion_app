@@ -7,9 +7,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,20 +31,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final GoogleTokenVerifierService googleTokenVerifierService;
 
     public AuthService(UserRepository userRepository,
             RefreshTokenRepository refreshTokenRepository,
             PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
             JwtService jwtService,
             GoogleTokenVerifierService googleTokenVerifierService) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.googleTokenVerifierService = googleTokenVerifierService;
     }
@@ -77,11 +71,13 @@ public class AuthService {
     @Transactional
     public AuthResponse login(AuthRequest request) {
         log.info("Login attempt for username={}, rememberMe={}", request.getUsername(), request.getRememberMe());
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        User authenticatedUser = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password"));
 
-        User authenticatedUser = (User) authentication.getPrincipal();
+        if (!passwordEncoder.matches(request.getPassword(), authenticatedUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+        }
+
         return issueAuthResponse(authenticatedUser, request.getRememberMe(), "password-login");
     }
 

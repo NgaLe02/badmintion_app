@@ -24,10 +24,10 @@ function AppNavbar() {
           ) : (
             <>
               <Link className="btn btn-outline-primary btn-sm" to="/signup">
-                Đăng ký
+                Đăng ký SSO
               </Link>
               <Link className="btn btn-primary btn-sm" to="/login">
-                Đăng nhập
+                Đăng nhập SSO
               </Link>
             </>
           )}

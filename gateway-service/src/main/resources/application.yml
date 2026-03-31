@@ -6,10 +6,16 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: portal-login-redirect
+          uri: no://op
+          predicates:
+            - Path=/
+          filters:
+            - RedirectTo=302, http://localhost:5173/login
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
-            - Path=/auth/**
+            - Path=/auth/**,/sso/**
         - id: facility-service
           uri: lb://FACILITY-SERVICE
           predicates:

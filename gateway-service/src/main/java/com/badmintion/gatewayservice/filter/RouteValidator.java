@@ -10,8 +10,12 @@ import org.springframework.stereotype.Component;
 public class RouteValidator {
 
     private static final List<String> PUBLIC_PATHS = List.of(
+            "/",
+            "/sso/login",
+            "/sso/register",
             "/auth/register",
             "/auth/login",
+            "/auth/password-auth",
             "/auth/refresh",
             "/auth/logout",
             "/auth/google/register",

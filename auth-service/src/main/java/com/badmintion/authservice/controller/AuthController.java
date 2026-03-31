@@ -45,6 +45,14 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/password-auth")
+    public ResponseEntity<AuthResponse> passwordAuth(@Valid @RequestBody AuthRequest request) {
+        log.info("Received SSO login request for username={}, rememberMe={}", request.getUsername(), request.getRememberMe());
+        AuthResponse response = authService.login(request);
+        log.info("SSO login completed for username={}, role={}", request.getUsername(), response.getUserRole());
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
         log.info("Received refresh request with tokenPrefix={}", tokenPrefix(request.getRefreshToken()));
