@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -143,11 +143,12 @@
       </div>
     </main>
 
-    <script>
+    <script th:inline="javascript">
       (function () {
         const query = new URLSearchParams(window.location.search);
+        const redirectBase = /*[[${redirectBase}]]*/ "http://localhost:5173";
         const redirectUri =
-          query.get("redirect_uri") || "http://localhost:5173/sso/callback";
+          query.get("redirect_uri") || `${redirectBase}/sso/callback`;
         const state = query.get("state") || "/";
         const loginLink = document.getElementById("loginLink");
         const messageEl = document.getElementById("message");

@@ -19,3 +19,6 @@ jwt:
 google:
   oauth:
     client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+
+sso:
+  redirect-base: https://book-app

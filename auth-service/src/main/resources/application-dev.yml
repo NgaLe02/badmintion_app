@@ -24,3 +24,6 @@ jwt:
 google:
   oauth:
     client-id: 827799100295-4r39cib06v28l4ruenmq3qqctvt7nglv.apps.googleusercontent.com
+
+sso:
+  redirect-base: http://localhost:5173
